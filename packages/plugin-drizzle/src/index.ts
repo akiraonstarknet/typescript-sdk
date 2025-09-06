@@ -364,14 +364,14 @@ export function drizzleStorage<
           if (!endCursor) {
             throw new DrizzleStorageError("End Cursor is undefined");
           }
-
+          
           await withTransaction(db, async (tx) => {
             context[DRIZZLE_PROPERTY] = { db: tx } as DrizzleStorage<
               TQueryResult,
               TFullSchema,
               TSchema
             >;
-
+            
             if (prevFinality === "pending") {
               // invalidate if previous block's finality was "pending"
               await invalidate(tx, cursor, idColumnMap, indexerId);
@@ -386,6 +386,15 @@ export function drizzleStorage<
                 indexerId,
               );
             }
+            delete context[DRIZZLE_PROPERTY];
+          })
+
+          await withTransaction(db, async (tx) => {
+            context[DRIZZLE_PROPERTY] = { db: tx } as DrizzleStorage<
+              TQueryResult,
+              TFullSchema,
+              TSchema
+            >;
 
             await next();
             delete context[DRIZZLE_PROPERTY];
